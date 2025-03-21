@@ -1,15 +1,19 @@
 package com.example.quizapp.service;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.example.quizapp.model.Quiz;
 import com.example.quizapp.model.User;
 import com.example.quizapp.repository.QuizRepository;
 import com.example.quizapp.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -51,7 +55,14 @@ public class UserService {
         if (user != null && isCorrect) {
             user.setScore(user.getScore() + 1);
             userRepository.save(user);
+        }else{
+            User user2 = new User(); // Create a new user
+        user2.setUsername(username);
+        user2.setQuizCode(quizCode); // Store the quiz code with the user
+        user2.setScore(1);
+        userRepository.save(user2);
         }
+        
     }
 
     public List<Map.Entry<String, Integer>> getLeaderboard(String quizCode) {
