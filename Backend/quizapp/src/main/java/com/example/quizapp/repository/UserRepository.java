@@ -11,4 +11,6 @@ import com.example.quizapp.model.User;
 public interface UserRepository extends JpaRepository<User, Integer> {
     User findByUsernameAndQuizCode(String username, String quizCode);
     List<User> findByQuizCodeOrderByScoreDesc(String quizCode);
+    User findByEmailAndPassword(String email, String password);
+    User findByEmail(String email);
 }

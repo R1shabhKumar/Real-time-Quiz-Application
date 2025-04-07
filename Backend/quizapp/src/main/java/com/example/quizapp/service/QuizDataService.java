@@ -1,9 +1,5 @@
 package com.example.quizapp.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,14 +18,10 @@ public class QuizDataService {
         return quizRepository.findByCode(code);
     }
 
-    public Map<String, Integer> getUserCounts() {
-         // Implementation for getting user counts
-        //  Iterate through quizzes and get user counts.
-        List<Quiz> quizzes = quizRepository.findAll(); // Or a more efficient way
-        Map<String, Integer> userCounts = new HashMap<>();
-        for (Quiz quiz : quizzes) {
-            userCounts.put(quiz.getCode(), quiz.getUserCount());
-        }
+    public int getUserCount(String code) {
+        Quiz quiz = quizRepository.findByCode(code); 
+        int userCounts = quiz.getUserCount();
+        
         return userCounts;
     }
 

@@ -8,18 +8,19 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.quizapp.model.Quiz;
 import com.example.quizapp.service.AdminService;
+import com.example.quizapp.service.QuizDataService;
 import com.example.quizapp.service.QuizService;
+import com.example.quizapp.service.UserService;
 
 @RestController
+@CrossOrigin("http://localhost:5173")
 @RequestMapping("/api/admin")
 public class AdminController {
 
@@ -27,6 +28,12 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private QuizService quizService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private QuizDataService quizDataService;;
 
     @PostMapping("/quiz/create")
     public ResponseEntity<Quiz> createQuiz(@RequestBody Quiz quiz) {
@@ -61,6 +68,27 @@ public class AdminController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "Invalid password"));
         }
+    }
+    /* 
+    @MessageMapping("leaderboard/{quizCode}")
+    public void getLeaderboard(@RequestParam String quizCode) {
+        List<Map.Entry<String, Integer>> leaderboard = userService.getLeaderboard(quizCode);
+        messagingTemplate.convertAndSend("/topic/leaderboard/" + quizCode, leaderboard);
+    }   */
+
+    @GetMapping("/leaderboard/{quizId}")
+    public ResponseEntity<?> getLeaderboard(@PathVariable String quizId) {
+        return ResponseEntity.ok(Map.of(
+            "players", userService.getLeaderboard(quizId),
+            "activeUsers", quizDataService.getUserCount(quizId),
+            "timeLeft", 0 // Placeholder for time left
+        ));
+    }
+
+    @MessageMapping("/scores/{quizId}")
+    public void sendLeaderboard(@DestinationVariable String quizId) {
+        List<Map.Entry<String, Integer>> leaderboard = userService.getLeaderboard(quizId);
+        messagingTemplate.convertAndSend("/topic/scores/" + quizId, Map.of("players", leaderboard));
     }
 }
 

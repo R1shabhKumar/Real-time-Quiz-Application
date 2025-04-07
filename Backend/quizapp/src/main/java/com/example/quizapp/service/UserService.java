@@ -34,11 +34,11 @@ public class UserService {
             return null; // Quiz not found
         }
 
-        // Check if the user is already in the quiz
+    /*    // Check if the user is already in the quiz
         User existingUser = userRepository.findByUsernameAndQuizCode(username, code);
         if (existingUser != null) {
             return existingUser; // Return the existing user
-        }
+        }    */
 
         User user = new User();
         user.setUsername(username);

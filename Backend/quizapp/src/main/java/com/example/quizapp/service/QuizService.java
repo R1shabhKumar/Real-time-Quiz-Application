@@ -1,7 +1,6 @@
 package com.example.quizapp.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -103,8 +102,8 @@ public class QuizService {
     //    webSocketService.sendUserCountsToAdmin();
     }
 
-    public Map<String, Integer> getUserCounts() {
+   /*  public Map<String, Integer> getUserCounts() {
         return quizDataService.getUserCounts();
-    }
+    } */
 }
 
