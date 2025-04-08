@@ -67,7 +67,7 @@ const AddCreateQuiz = () => {
       return;
     }
 
-    const createdByEmail = localStorage.getItem("userEmail"); // Retrieve email from local storage
+    const createdByEmail = localStorage.getItem("email"); // Retrieve email from local storage
 
     try {
       const response = await Axios.post("/api/quiz", { 

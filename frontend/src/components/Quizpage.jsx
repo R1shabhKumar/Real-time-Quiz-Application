@@ -172,9 +172,9 @@ const Quizpage = () => {
               </span>
             </div>
             <div className="mb-6">
-              {questions.length > 0 && questions[currentQuestion]?.question ? (
+              {questions.length > 0 && questions[currentQuestion]?.text ? (
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                  {questions[currentQuestion]?.question}
+                  {questions[currentQuestion]?.text}
                 </h2>
               ) : (
                 <p className="text-gray-500 dark:text-gray-400">Loading question...</p>

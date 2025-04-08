@@ -15,7 +15,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const response = await Axios.get("/api/quizzes"); // Use Axios
+        const response = await Axios.post("/api/admin/quizzes", {
+          email, // Send the user's email as a parameter
+        });
         setQuizzes(response.data);
       } catch (error) {
         console.error("Error fetching quizzes:", error);
@@ -30,8 +32,10 @@ const Dashboard = () => {
       setName(extractedName);
     }
 
-    fetchQuizzes();
-  }, []);
+    if (email) {
+      fetchQuizzes(); // Fetch quizzes only after email is set
+    }
+  }, [email]); // Add email as a dependency
 
   const handleCreateQuiz = () => {
     navigate('/add');
@@ -46,13 +50,14 @@ const Dashboard = () => {
     // Add logout logic here
   };
 
-  const handleQuizClick = (quizId) => {
-    navigate(`/edit/${quizId}`);
+  const handleQuizClick = (code) => {
+    localStorage.setItem("quizCode", code); // Save the quiz code in local storage
+    navigate(`/edit`); // Navigate to the edit page
   };
 
-  const handleLeaderboardClick = (quizId) => {
+  const handleLeaderboardClick = (code) => {
     sessionStorage.setItem("leaderboardAccess", "true");
-    navigate(`/leaderboard?quizId=${quizId}`);
+    navigate(`/leaderboard?code=${code}`); // Use code instead of quizId
   };
 
   const indexOfLastQuiz = currentPage * quizzesPerPage;
@@ -129,12 +134,12 @@ const Dashboard = () => {
           <ul className="space-y-4">
             {currentQuizzes.map((quiz) => (
               <li
-                key={quiz.id}
+                key={quiz.code} // Use code as the unique key
                 className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-300 flex justify-between items-center"
               >
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                    {quiz.id}
+                    {quiz.code} {/* Display the unique 6-character code */}
                   </span>
                   <span className="text-lg font-semibold text-gray-800 dark:text-white">
                     {quiz.title}
@@ -142,13 +147,13 @@ const Dashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleQuizClick(quiz.id)}
+                    onClick={() => handleQuizClick(quiz.code)} // Pass code to handleQuizClick
                     className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold shadow-md hover:bg-blue-600 transition duration-300"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleLeaderboardClick(quiz.id)}
+                    onClick={() => handleLeaderboardClick(quiz.code)} // Pass code to handleLeaderboardClick
                     className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold shadow-md hover:bg-green-600 transition duration-300"
                   >
                     Leaderboard

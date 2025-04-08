@@ -1,31 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Axios } from "../config/AxiosHelper"; // Import Axios from AxiosHelper.js
 
 const EditQuiz = () => {
-  const { quizId } = useParams(); // Get quizId from URL parameters
+  const { code } = useParams(); // Get code from URL parameters
+  const navigate = useNavigate(); // For navigation in case of errors
   const [quizTitle, setQuizTitle] = useState('');
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
     const fetchQuizData = async () => {
+      const storedCode = localStorage.getItem("quizCode"); // Retrieve the quiz code from local storage
+
+      if (!storedCode) {
+        toast.error("Quiz code is missing!");
+        navigate("/dashboard"); // Redirect to dashboard or another page
+        return;
+      }
+
       try {
-        const response = await Axios.get(`/api/quizzes/${quizId}`); // Use Axios
+        // Send GET request with code as a query parameter
+        const response = await Axios.get(`/api/quiz/get?code=${storedCode}`);
         const { title, questions } = response.data;
         setQuizTitle(title);
-        setQuestions(questions.map(q => ({
-          ...q,
-          correctAnswer: q.correctAnswer || '' // Ensure correctAnswer has a default value
-        })));
+        setQuestions(
+          questions.map((q) => ({
+            ...q,
+            correctAnswer: q.correctAnswer || "", // Ensure correctAnswer has a default value
+          }))
+        );
       } catch (error) {
-        console.error('Error fetching quiz data:', error);
-        toast.error('Failed to fetch quiz data.');
+        console.error("Error fetching quiz data:", error);
+        toast.error("Failed to fetch quiz data.");
       }
     };
 
     fetchQuizData();
-  }, [quizId]);
+  }, [navigate]);
 
   const handleAddQuestion = () => {
     setQuestions([...questions, { question: '', options: ['', '', '', ''], correctAnswer: '', timeLimit: 30 }]);
@@ -40,7 +52,7 @@ const EditQuiz = () => {
 
     for (let i = 0; i < questions.length; i++) {
       const question = questions[i];
-      if (!question.question.trim()) {
+      if (!question.text.trim()) {
         toast.error(`Question ${i + 1} is required!`);
         return;
       }
@@ -63,7 +75,7 @@ const EditQuiz = () => {
     }
 
     try {
-      await Axios.put(`/api/quizzes/${quizId}`, {
+      await Axios.put(`/api/quizzes/${code}`, {
         title: quizTitle,
         questions,
       }); // Use Axios
@@ -91,7 +103,7 @@ const EditQuiz = () => {
           </div>
         </div>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-          Editing quiz with ID: {quizId}
+          Editing quiz with Code: {code}
         </p>
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Quiz Title</label>
@@ -122,7 +134,7 @@ const EditQuiz = () => {
               </div>
               <input
                 type="text"
-                value={question.question}
+                value={question.text}
                 onChange={(e) => {
                   const updatedQuestions = [...questions];
                   updatedQuestions[index].question = e.target.value;
