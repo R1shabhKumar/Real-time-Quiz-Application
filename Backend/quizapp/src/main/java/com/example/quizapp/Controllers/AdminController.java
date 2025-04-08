@@ -11,7 +11,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.quizapp.model.Quiz;
 import com.example.quizapp.service.AdminService;
@@ -42,9 +49,13 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdQuiz2);
     }
 
-    @GetMapping("/quizzes")
-    public ResponseEntity<List<Quiz>> getQuizzes() {
-        List<Quiz> quizzes = adminService.getAllQuizzes();
+
+    @PostMapping("/quizzes")
+    public ResponseEntity<List<Quiz>> getQuizzes(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        List<Quiz> quizzes = adminService.getAllQuizzes().stream()
+                .filter(quiz -> quiz.getCreatedByEmail() != null && quiz.getCreatedByEmail().equals(email))
+                .toList();
         return ResponseEntity.ok(quizzes);
     }
 
