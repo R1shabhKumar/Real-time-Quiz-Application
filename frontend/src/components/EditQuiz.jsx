@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Axios } from "../config/AxiosHelper"; // Import Axios from AxiosHelper.js
 
 const EditQuiz = () => {
-  const { code } = useParams(); // Get code from URL parameters
   const navigate = useNavigate(); // For navigation in case of errors
   const [quizTitle, setQuizTitle] = useState('');
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
     const fetchQuizData = async () => {
-      const storedCode = localStorage.getItem("quizCode"); // Retrieve the quiz code from local storage
-
-      if (!storedCode) {
-        toast.error("Quiz code is missing!");
-        navigate("/dashboard"); // Redirect to dashboard or another page
-        return;
-      }
-
       try {
+        // Retrieve the quiz code from localStorage
+        const storedCode = localStorage.getItem("quizCode");
+
+        if (!storedCode) {
+          throw new Error("Quiz code is missing!"); // Throw an error if the code is not found
+        }
+
         // Send GET request with code as a query parameter
         const response = await Axios.get(`/api/quiz/get?code=${storedCode}`);
         const { title, questions } = response.data;
+
         setQuizTitle(title);
         setQuestions(
           questions.map((q) => ({
@@ -32,7 +31,8 @@ const EditQuiz = () => {
         );
       } catch (error) {
         console.error("Error fetching quiz data:", error);
-        toast.error("Failed to fetch quiz data.");
+        toast.error(error.message || "Failed to fetch quiz data.");
+        navigate("/dashboard"); // Redirect to the dashboard if an error occurs
       }
     };
 
@@ -75,13 +75,18 @@ const EditQuiz = () => {
     }
 
     try {
-      await Axios.put(`/api/quizzes/${code}`, {
+      const storedCode = localStorage.getItem("quizCode"); // Retrieve the quiz code from localStorage
+      if (!storedCode) {
+        throw new Error("Quiz code is missing!");
+      }
+
+      await Axios.put(`/api/quiz/${storedCode}`, {
         title: quizTitle,
         questions,
       }); // Use Axios
       toast.success('Quiz updated successfully!');
     } catch (error) {
-      toast.error('Error saving quiz!');
+      toast.error(error.message || 'Error saving quiz!');
       console.error('Error saving quiz:', error);
     }
   };
@@ -103,7 +108,7 @@ const EditQuiz = () => {
           </div>
         </div>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-          Editing quiz with Code: {code}
+          Editing quiz with Code: {localStorage.getItem("quizCode") || "N/A"}
         </p>
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">Quiz Title</label>
