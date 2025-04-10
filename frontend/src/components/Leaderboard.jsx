@@ -2,24 +2,41 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as XLSX from "xlsx";
 import { Toaster, toast } from "react-hot-toast";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Client } from "@stomp/stompjs"; // Import STOMP client for WebSocket
 import { Axios } from "../config/AxiosHelper"; // Import Axios from AxiosHelper.js
 
 const Leaderboard = () => {
-  const { quizId } = useParams();
   const navigate = useNavigate();
-  const [players, setPlayers] = useState([]);
-  const [activeUsers, setActiveUsers] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(null);
+  const [players, setPlayers] = useState([]); // Leaderboard players
+  const [activeUsers, setActiveUsers] = useState(0); // Active users count
+  const [timeLeft, setTimeLeft] = useState(0); // Time left (placeholder)
 
   useEffect(() => {
+    const storedCode = localStorage.getItem("quizCode"); // Retrieve the quiz code from local storage
+
+    if (!storedCode) {
+      toast.error("Quiz code is missing!");
+      navigate("/dashboard"); // Redirect to dashboard or another page
+      return;
+    }
+
     const fetchLeaderboardData = async () => {
       try {
-        const response = await Axios.get(`/api/leaderboard/${quizId}`); // Use Axios
-        setPlayers(response.data.players);
-        setActiveUsers(response.data.activeUsers);
-        setTimeLeft(response.data.timeLeft);
+        // Fetch leaderboard data from backend
+        const response = await Axios.get(`/api/admin/leaderboard/${storedCode}`);
+        console.log("Players data (raw):", response.data.players); // Debugging log
+
+        // Transform the players data into the expected format
+        const transformedPlayers = response.data.players.map((player) => {
+          const [name, score] = Object.entries(player)[0]; // Extract key-value pair
+          return { name, score }; // Return transformed object
+        });
+
+        setPlayers(transformedPlayers); // Set transformed players data
+        console.log("Players data (transformed):", transformedPlayers); // Debugging log
+        setActiveUsers(response.data.activeUsers); // Set active users count
+        setTimeLeft(response.data.timeLeft); // Set time left (placeholder)
       } catch (error) {
         console.error("Error fetching leaderboard data:", error);
         toast.error("Failed to fetch leaderboard data.");
@@ -28,30 +45,40 @@ const Leaderboard = () => {
 
     fetchLeaderboardData();
 
-    // WebSocket setup
+    // WebSocket setup using native WebSocket URL
     const client = new Client({
-      brokerURL: "ws://localhost:8080/ws", // Replace with your WebSocket server URL
-      onConnect: () => {
-        console.log("Connected to WebSocket");
-
-        // Subscribe to user scores updates
-        client.subscribe(`/topic/scores/${quizId}`, (message) => {
-          const data = JSON.parse(message.body);
-          setPlayers(data.players); // Update players with new scores
-        });
+      brokerURL: "ws://localhost:8080/ws", // Use WebSocket URL directly
+      connectHeaders: {
+        // Add any required headers here if needed
       },
-      onDisconnect: () => {
-        console.log("Disconnected from WebSocket");
-      },
-      debug: (str) => console.log(str),
+      debug: (str) => console.log(str), // Debug logs for WebSocket
+      reconnectDelay: 5000, // Reconnect after 5 seconds if disconnected
+      heartbeatIncoming: 4000, // Heartbeat interval for incoming messages
+      heartbeatOutgoing: 4000, // Heartbeat interval for outgoing messages
     });
+
+    client.onConnect = () => {
+      console.log("Connected to WebSocket");
+
+      // Subscribe to the topic for scores
+      client.subscribe(`/topic/scores/${storedCode}`, (message) => {
+        const data = JSON.parse(message.body);
+        console.log("WebSocket message received:", data); // Debugging log
+        setPlayers(data.players); // Update players with new scores
+      });
+    };
+
+    client.onStompError = (frame) => {
+      console.error("Broker reported error:", frame.headers["message"]);
+      console.error("Additional details:", frame.body);
+    };
 
     client.activate();
 
     return () => {
       client.deactivate(); // Cleanup WebSocket connection on component unmount
     };
-  }, [quizId]);
+  }, [navigate]);
 
   const saveAsExcel = () => {
     try {
@@ -111,7 +138,7 @@ const Leaderboard = () => {
               <AnimatePresence>
                 {players.map((player, index) => (
                   <motion.tr
-                    key={player.name}
+                    key={player.name || index} // Use player.name if unique, otherwise fallback to index
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
