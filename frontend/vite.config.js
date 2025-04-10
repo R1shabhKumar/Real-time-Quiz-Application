@@ -10,4 +10,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   darkMode: "class",
+  define: {
+    global: {},
+  },
 })
