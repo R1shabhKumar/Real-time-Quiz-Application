@@ -62,9 +62,29 @@ const Leaderboard = () => {
 
       // Subscribe to the topic for scores
       client.subscribe(`/topic/scores/${storedCode}`, (message) => {
-        const data = JSON.parse(message.body);
-        console.log("WebSocket message received:", data); // Debugging log
-        setPlayers(data.players); // Update players with new scores
+        try {
+          const rawData = JSON.parse(message.body);
+          console.log("WebSocket message received (raw):", rawData); // Debugging log
+
+          // Extract the players array from the rawData
+          const playersData = rawData.players;
+
+          // Check if playersData is an array
+          if (Array.isArray(playersData)) {
+            // Transform the data into the expected format
+            const transformedData = playersData.map((player) => {
+              const [name, score] = Object.entries(player)[0]; // Extract key-value pair
+              return { name, score }; // Return transformed object
+            });
+
+            console.log("Transformed WebSocket data:", transformedData); // Debugging log
+            setPlayers(transformedData); // Update players with transformed data
+          } else {
+            console.error("WebSocket data 'players' is not an array:", playersData);
+          }
+        } catch (error) {
+          console.error("Error processing WebSocket message:", error);
+        }
       });
     };
 
