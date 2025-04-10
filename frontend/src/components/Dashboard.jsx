@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaUserCircle, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Axios } from "../config/AxiosHelper"; // Import Axios from AxiosHelper.js
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -46,8 +47,15 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logout clicked');
-    // Add logout logic here
+    // Remove quiz code and email from local storage
+    localStorage.removeItem("quizCode");
+    localStorage.removeItem("email");
+
+    // Display a success message
+    toast.success("Logout successful");
+
+    // Navigate to the homepage
+    navigate("/home");
   };
 
   const handleQuizClick = (code) => {
