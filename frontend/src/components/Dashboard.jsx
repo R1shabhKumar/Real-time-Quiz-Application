@@ -56,8 +56,8 @@ const Dashboard = () => {
   };
 
   const handleLeaderboardClick = (code) => {
-    sessionStorage.setItem("leaderboardAccess", "true");
-    navigate(`/leaderboard?code=${code}`); // Use code instead of quizId
+    localStorage.setItem("quizCode", code); // Save the quiz code in local storage
+    navigate(`/leaderboard`); // Navigate to the leaderboard page
   };
 
   const indexOfLastQuiz = currentPage * quizzesPerPage;
