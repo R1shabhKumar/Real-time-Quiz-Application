@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -100,6 +101,20 @@ public class AdminController {
     public void sendLeaderboard(@DestinationVariable String quizId) {
         List<Map.Entry<String, Integer>> leaderboard = userService.getLeaderboard(quizId);
         messagingTemplate.convertAndSend("/topic/scores/" + quizId, Map.of("players", leaderboard));
+    }
+
+    @Scheduled(fixedRate = 5000) // Runs every 2 seconds
+    public void autoSendLeaderboards() {
+        // Fetch all quizzes (or filter based on your requirements)
+        List<Quiz> allQuizzes = quizService.getAllQuizzes();
+
+        for (Quiz quiz : allQuizzes) {
+            String quizId = String.valueOf(quiz.getCode());
+            List<Map.Entry<String, Integer>> leaderboard = userService.getLeaderboard(quizId);
+
+            // Send leaderboard updates for each quiz
+            messagingTemplate.convertAndSend("/topic/scores/" + quizId, Map.of("players", leaderboard));
+        }
     }
 }
 
