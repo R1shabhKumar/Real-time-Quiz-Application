@@ -11,13 +11,10 @@ CREATE TABLE quiz (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(255) NOT NULL UNIQUE,
     title VARCHAR(255) NOT NULL
+    created_by_email VARCHAR(255)
 );
 
--- Drop the created_by_email column
-ALTER TABLE quiz DROP COLUMN created_by_email;
 
--- Add the created_by_email column
-ALTER TABLE quiz ADD COLUMN created_by_email VARCHAR(255);
 
 -- Create the question table
 CREATE TABLE question (
