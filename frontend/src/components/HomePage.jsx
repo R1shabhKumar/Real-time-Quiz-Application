@@ -14,7 +14,7 @@ const HomePage = () => {
     const navigate = useNavigate(); // Initialize useNavigate
 
     const handlePageSelection = (page) => {
-      // this part will be removed once the chat page is ready
+// this part will be removed once the chat page is ready
         if (page === 'chat') {
             toast.error('Under development'); // Display toaster message
             return; // Do not proceed further
@@ -97,7 +97,7 @@ console.log('Error:', error);
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-400 via-blue-400 to-blue-400">
             <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-8">
-                Welcome to Real-Time App
+                SELECT ONE
             </h1>
             {!selectedPage && (
                 <div className="flex space-x-8">
@@ -124,6 +124,19 @@ console.log('Error:', error);
                         </div>
                         <p className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600">
                             Quiz Page
+                        </p>
+                    </a>
+
+                    {/* Huffman coding Icon */}
+                    <a
+                        onClick={() => navigate('/compress')}
+                        className="flex flex-col items-center cursor-pointer group"
+                    >
+                        <div className="p-6 bg-purple-500 text-white rounded-full shadow-lg transform transition duration-300 group-hover:scale-110 group-hover:bg-purple-600">
+                            <div className="text-4xl">📦</div> {/* Updated icon */}
+                        </div>
+                        <p className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600">
+                            Huffman Coding
                         </p>
                     </a>
                 </div>
