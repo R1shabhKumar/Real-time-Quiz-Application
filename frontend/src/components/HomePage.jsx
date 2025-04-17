@@ -11,13 +11,17 @@ const HomePage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [selectedPage, setSelectedPage] = useState(null);
+    const [showVisualizerOptions, setShowVisualizerOptions] = useState(false); // State to show visualizer options
     const navigate = useNavigate(); // Initialize useNavigate
 
     const handlePageSelection = (page) => {
-// this part will be removed once the chat page is ready
         if (page === 'chat') {
             toast.error('Under development'); // Display toaster message
             return; // Do not proceed further
+        }
+        if (page === 'visualizer') {
+            setShowVisualizerOptions(true); // Show visualizer options
+            return;
         }
         setSelectedPage(page);
         setShowRole(true); // Automatically show role selection
@@ -60,7 +64,6 @@ const HomePage = () => {
             }
         } catch (error) {
             console.error('Error during login:', error);
-console.log('Error:', error);
             toast.error('An error occurred. Please try again.');
         }
     };
@@ -99,7 +102,7 @@ console.log('Error:', error);
             <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-8">
                 SELECT ONE
             </h1>
-            {!selectedPage && (
+            {!selectedPage && !showVisualizerOptions && (
                 <div className="flex space-x-8">
                     {/* Chatting Page Icon */}
                     <a
@@ -127,20 +130,44 @@ console.log('Error:', error);
                         </p>
                     </a>
 
-                    {/* Huffman coding Icon */}
+                    {/* Visualizer Icon */}
                     <a
-                        onClick={() => navigate('/compress')}
+                        onClick={() => handlePageSelection('visualizer')}
                         className="flex flex-col items-center cursor-pointer group"
                     >
                         <div className="p-6 bg-purple-500 text-white rounded-full shadow-lg transform transition duration-300 group-hover:scale-110 group-hover:bg-purple-600">
-                            <div className="text-4xl">📦</div> {/* Updated icon */}
+                            <div className="text-4xl">📦</div>
                         </div>
                         <p className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600">
-                            Huffman Coding
+                            Visualizer
                         </p>
                     </a>
                 </div>
             )}
+
+            {/* Visualizer Options */}
+            {showVisualizerOptions && (
+                <div className="flex flex-col items-center space-y-6">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                        Choose a Visualizer
+                    </h2>
+                    <div className="flex space-x-8">
+                        <button
+                            onClick={() => navigate('/compress')}
+                            className="px-6 py-3 bg-purple-500 text-white rounded-lg font-semibold shadow-lg hover:bg-purple-600 transition duration-300"
+                        >
+                            Huffman Coding
+                        </button>
+                        <button
+                            onClick={() => navigate('/queens')}
+                            className="px-6 py-3 bg-purple-500 text-white rounded-lg font-semibold shadow-lg hover:bg-purple-600 transition duration-300"
+                        >
+                            N Queens Visualizer
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {showRole && (
                 <div className="text-center mt-12">
                     <h1 className="text-2xl mb-5">Select Your Role</h1>
