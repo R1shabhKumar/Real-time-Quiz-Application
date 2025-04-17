@@ -7,6 +7,7 @@ import Quizpage from "../components/Quizpage";
 import Dashboard from "../components/Dashboard";
 import AddCreateQuiz from "../components/AddCreateQuiz";
 import EditQuiz from "../components/EditQuiz";
+import Compression from "../components/Compression";
 import NQueensVisualizer from "../components/NQueensVisualizer";
 
 const AppRoutes = () => {
@@ -22,7 +23,8 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/add" element={<AddCreateQuiz />} />
       <Route path="/edit" element={<EditQuiz />} />
-      <Route path="queens" element={<NQueensVisualizer/>} />
+      <Route path="/compress" element={<Compression />} />
+      <Route path="/queens" element={<NQueensVisualizer/>} />
     </Routes>
   );
 };
